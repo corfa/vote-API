@@ -2,16 +2,18 @@ package app
 
 import (
 	"Voting-API/app/handlers"
+	"github.com/gomodule/redigo/redis"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"log"
 	"net/http"
+	"os"
 )
 
 // App has router and db instances
 type App struct {
-	Router *mux.Router
-	//DB     *gorm.DB
+	Router    *mux.Router
+	RedisConn redis.Conn
 }
 
 // Initialize initializes the app with predefined configuration
@@ -21,9 +23,10 @@ func (a *App) Initialize() {
 		log.Fatal("Error loading .env file")
 	}
 	//ДЛЯ РЕДИСА
-	//redisHost := os.Getenv("REDIS_HOST")
-	//redisPort := os.Getenv("REDIS_PORT")
-	//redisDbNumber := os.Getenv("REDIS_DB_NUMBER")
+	redisHost := os.Getenv("REDIS_HOST")
+	redisPort := os.Getenv("REDIS_PORT")
+	//var redisDbNumber int = os.Getenv("REDIS_DB_NUMBER")
+	a.RedisConn, _ = redis.Dial("tcp", redisHost+":"+redisPort)
 
 	a.Router = mux.NewRouter()
 	a.setRouters()
@@ -61,10 +64,10 @@ func (a *App) Run(host string) {
 	log.Fatal(http.ListenAndServe(host, a.Router))
 }
 
-type RequestHandlerFunction func(w http.ResponseWriter, r *http.Request)
+type RequestHandlerFunction func(connRedis redis.Conn, w http.ResponseWriter, r *http.Request)
 
 func (a *App) handleRequest(handler RequestHandlerFunction) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		handler(w, r)
+		handler(a.RedisConn, w, r)
 	}
 }

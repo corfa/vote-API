@@ -1,24 +1,24 @@
 package handlers
 
 import (
+	"Voting-API/redisQ"
+	"encoding/json"
 	"fmt"
+	"github.com/gomodule/redigo/redis"
 	"net/http"
 )
 
-func CreateVote(w http.ResponseWriter, r *http.Request) {
-	//project := model.Project{}
-	//
-	//decoder := json.NewDecoder(r.Body)
-	//if err := decoder.Decode(&project); err != nil {
-	//	respondError(w, http.StatusBadRequest, err.Error())
-	//	return
-	//}
-	//defer r.Body.Close()
-	//
-	//if err := db.Save(&project).Error; err != nil {
-	//	respondError(w, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-	//respondJSON(w, http.StatusCreated, project)
-	fmt.Fprintf(w, "голосование типа созданно!")
+type Vote struct {
+	Name string `json:"name"`
+}
+
+func CreateVote(conn redis.Conn, w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var vote Vote
+	err := decoder.Decode(&vote)
+	if err != nil {
+		// обработка ошибки
+	}
+	redisQ.AddVote(conn, vote.Name)
+	fmt.Fprintf(w, "vote added!")
 }
