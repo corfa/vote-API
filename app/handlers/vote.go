@@ -17,8 +17,13 @@ func CreateVote(conn redis.Conn, w http.ResponseWriter, r *http.Request) {
 	var vote Vote
 	err := decoder.Decode(&vote)
 	if err != nil {
-		// обработка ошибки
+		fmt.Fprintf(w, "nooooy")
+		return
 	}
-	redisQ.AddVote(conn, vote.Name)
+	_, err = redisQ.AddVote(conn, vote.Name)
+	if err != nil {
+		fmt.Fprintf(w, "nooooy")
+		return
+	}
 	fmt.Fprintf(w, "vote added!")
 }
