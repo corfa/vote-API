@@ -36,6 +36,8 @@ func (a *App) Initialize() {
 func (a *App) setRouters() {
 	// Routing for handling the projects
 	a.Post("/vote", a.handleRequest(handlers.CreateVote))
+	a.Post("/vote/{name}", a.handleRequest(handlers.IncrementVote))
+	a.Get("/vote/{name}", a.handleRequest(handlers.GetVote))
 
 }
 
